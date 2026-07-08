@@ -79,21 +79,36 @@ func FormatRecord(rec *msdnsp.DNS_RECORD) []string {
 	return lines
 }
 
-// PrintRecord logs a record's details as an indented tree, colouring each field value blue. The
-// caller supplies the indent that positions the record beneath its node in the output tree.
+// PrintRecords logs a node's records as a nested tree: each record is a child of the node, and
+// each record's decoded fields are children of that record's "Type" header line. Every field
+// value is coloured blue. The caller supplies the prefix that positions the records beneath their
+// node — the leading whitespace (and any ancestor "│" guides) placed before each record's glyph.
 //
 // Parameters:
 //
-//	rec (*msdnsp.DNS_RECORD): The record to print.
-//	indent (string): The leading whitespace placed before each line's tree glyph.
-func PrintRecord(rec *msdnsp.DNS_RECORD, indent string) {
-	lines := FormatRecord(rec)
-	for i, line := range lines {
-		glyph := "├──"
-		if i == len(lines)-1 {
-			glyph = "└──"
+//	recs ([]*msdnsp.DNS_RECORD): The node's records, in display order.
+//	prefix (string): The leading string placed before each record's tree glyph.
+func PrintRecords(recs []*msdnsp.DNS_RECORD, prefix string) {
+	for i, rec := range recs {
+		lines := FormatRecord(rec)
+
+		recGlyph := "├──"
+		fieldPrefix := prefix + "│   "
+		if i == len(recs)-1 {
+			recGlyph = "└──"
+			fieldPrefix = prefix + "    "
 		}
-		logger.Print(fmt.Sprintf("%s%s %s", indent, glyph, colourValue(line)))
+
+		// The first line is the record's "Type" header; the rest are its fields, nested beneath.
+		logger.Print(fmt.Sprintf("%s%s %s", prefix, recGlyph, colourValue(lines[0])))
+		fields := lines[1:]
+		for j, field := range fields {
+			glyph := "├──"
+			if j == len(fields)-1 {
+				glyph = "└──"
+			}
+			logger.Print(fmt.Sprintf("%s%s %s", fieldPrefix, glyph, colourValue(field)))
+		}
 	}
 }
 

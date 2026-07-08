@@ -41,10 +41,10 @@ func ListRecords(opts *common.Options) error {
 	for i, entry := range entries {
 		last := i == len(entries)-1
 		glyph := "├──"
-		childIndent := "  │   "
+		childPrefix := "  │   "
 		if last {
 			glyph = "└──"
-			childIndent = "      "
+			childPrefix = "      "
 		}
 
 		name := entry.GetEqualFoldAttributeValue("name")
@@ -57,14 +57,16 @@ func ListRecords(opts *common.Options) error {
 		}
 		logger.Print(line)
 
+		recs := make([]*msdnsp.DNS_RECORD, 0)
 		for _, raw := range entry.GetEqualFoldRawAttributeValues("dnsRecord") {
 			rec := &msdnsp.DNS_RECORD{}
 			if _, err := rec.Unmarshal(raw); err != nil {
 				logger.Warn(fmt.Sprintf("Skipping unparseable dnsRecord value on node '%s': %s", name, err))
 				continue
 			}
-			common.PrintRecord(rec, childIndent)
+			recs = append(recs, rec)
 		}
+		common.PrintRecords(recs, childPrefix)
 	}
 
 	return nil

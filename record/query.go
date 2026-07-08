@@ -50,14 +50,16 @@ func QueryRecord(opts *common.Options, record string) error {
 		logger.Print("      \x1b[91m[!] Node is tombstoned (inactive)\x1b[0m")
 	}
 
+	recs := make([]*msdnsp.DNS_RECORD, 0, len(raws))
 	for _, raw := range raws {
 		rec := &msdnsp.DNS_RECORD{}
 		if _, err := rec.Unmarshal(raw); err != nil {
 			logger.Warn(fmt.Sprintf("Skipping unparseable dnsRecord value: %s", err))
 			continue
 		}
-		common.PrintRecord(rec, "      ")
+		recs = append(recs, rec)
 	}
+	common.PrintRecords(recs, "      ")
 
 	return nil
 }
