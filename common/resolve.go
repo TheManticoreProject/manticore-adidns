@@ -58,7 +58,8 @@ func DNSRoot(forest, legacy bool, domainRoot, forestRoot string) string {
 
 // RelativeTarget strips a trailing ".<zone>" suffix from an FQDN record name so it can be used
 // as a node name relative to the zone, mirroring dnstool.py. A name that does not end in the
-// zone is returned unchanged.
+// zone is returned unchanged. A record equal to the zone itself refers to the zone apex, whose
+// node is stored under the name "@" in ADIDNS, so it is normalised to "@".
 //
 // Parameters:
 //
@@ -67,14 +68,19 @@ func DNSRoot(forest, legacy bool, domainRoot, forestRoot string) string {
 //
 // Returns:
 //
-//	string: The node name relative to the zone.
+//	string: The node name relative to the zone ("@" for the zone apex).
 func RelativeTarget(record, zone string) string {
 	if zone != "" && strings.HasSuffix(strings.ToLower(record), strings.ToLower(zone)) {
 		cut := len(record) - len(zone) - 1
 		if cut < 0 {
 			cut = 0
 		}
-		return record[:cut]
+		relative := record[:cut]
+		if relative == "" {
+			// The record is the zone itself: this is the apex node, stored as "@".
+			return "@"
+		}
+		return relative
 	}
 	return record
 }

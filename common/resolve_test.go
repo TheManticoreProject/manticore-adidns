@@ -55,7 +55,9 @@ func TestRelativeTarget(t *testing.T) {
 		{"host.sub.domain.local", "domain.local", "host.sub"},
 		{"www", "domain.local", "www"},
 		{"other.example.com", "domain.local", "other.example.com"},
-		{"domain.local", "domain.local", ""}, // apex, matches dnstool.py behaviour
+		{"domain.local", "domain.local", "@"},                      // apex: the record equals the zone, stored as "@"
+		{"DOMAIN.LOCAL", "domain.local", "@"},                      // apex, case-insensitive
+		{"www.domain.local.", "domain.local", "www.domain.local."}, // trailing dot: not a zone suffix, left as-is
 	}
 	for _, c := range cases {
 		if got := common.RelativeTarget(c.record, c.zone); got != c.want {
