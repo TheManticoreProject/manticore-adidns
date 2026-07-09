@@ -142,6 +142,10 @@ func parseArgs() {
 	addZoneSelectionGroup(recordQuery)
 	addTargetGroup(recordQuery)
 
+	recordList := recordParser.AddSubParser("list", "List every node in the zone and its records.")
+	addCommonGroups(recordList)
+	addZoneSelectionGroup(recordList)
+
 	recordAdd := recordParser.AddSubParser("add", "Add an A record (creating the node if needed).")
 	addCommonGroups(recordAdd)
 	addZoneSelectionGroup(recordAdd)
@@ -213,6 +217,8 @@ func dispatchRecord() error {
 	switch recordAction {
 	case "query":
 		return record.QueryRecord(buildOptions(), recordName)
+	case "list":
+		return record.ListRecords(buildOptions())
 	case "add":
 		return record.AddRecord(buildOptions(), recordName, recordData, ttl, allowMultiple, recordType)
 	case "modify":

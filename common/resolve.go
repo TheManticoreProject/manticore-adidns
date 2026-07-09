@@ -104,3 +104,21 @@ func (ctx *Context) FindNode(target string) (*ldap.Entry, error) {
 	}
 	return entries[0], nil
 }
+
+// ListNodes returns every dnsNode directly under the current zone, each with its dnsRecord,
+// dNSTombstoned, and name attributes.
+//
+// Returns:
+//
+//	[]*ldap.Entry: The zone's nodes (possibly empty).
+//	error: An error if the search fails, including a helpful message when the zone does not exist.
+func (ctx *Context) ListNodes() ([]*ldap.Entry, error) {
+	entries, err := ctx.Session.QuerySingleLevel(ctx.SearchBase, "(objectClass=dnsNode)", []string{"dnsRecord", "dNSTombstoned", "name"})
+	if err != nil {
+		if goldap.IsErrorWithCode(err, goldap.LDAPResultNoSuchObject) {
+			return nil, fmt.Errorf("zone '%s' not found under %s (check --zone / --forest / --legacy)", ctx.Zone, ctx.DNSRoot)
+		}
+		return nil, fmt.Errorf("listing nodes in zone %q: %w", ctx.Zone, err)
+	}
+	return entries, nil
+}

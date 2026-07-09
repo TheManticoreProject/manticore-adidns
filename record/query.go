@@ -1,5 +1,5 @@
-// Package record implements the adidns "record" object actions (query, add, modify, remove,
-// resurrect, delete) over LDAP.
+// Package record implements the adidns "record" object actions (query, list, add, modify,
+// remove, resurrect, delete) over LDAP.
 package record
 
 import (
