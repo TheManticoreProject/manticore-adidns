@@ -56,8 +56,7 @@ func AddRecord(opts *common.Options, record, data string, ttl int, allowMultiple
 				}
 				a := &msdnsp.DNS_RPC_RECORD_A{}
 				if _, err := a.Unmarshal(existing.Data); err == nil {
-					logger.Warn(fmt.Sprintf("Record '%s' already exists and points to %s. Use 'modify' to overwrite, or --allow-multiple to add another.", record, a.GetIPv4()))
-					return nil
+					return fmt.Errorf("record '%s' already exists and points to %s (use 'modify' to overwrite, or --allow-multiple to add another)", record, a.GetIPv4())
 				}
 			}
 		}
