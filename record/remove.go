@@ -43,8 +43,7 @@ func RemoveRecord(opts *common.Options, record, data string, rtype string) error
 		return err
 	}
 	if entry == nil {
-		logger.Warn(fmt.Sprintf("Record '%s' not found in zone '%s'.", record, ctx.Zone))
-		return nil
+		return fmt.Errorf("record '%s' not found in zone '%s'", record, ctx.Zone)
 	}
 
 	raws := entry.GetEqualFoldRawAttributeValues("dnsRecord")
@@ -68,8 +67,7 @@ func RemoveRecord(opts *common.Options, record, data string, rtype string) error
 			}
 		}
 		if match == nil {
-			logger.Warn(fmt.Sprintf("No A record with address %s found on '%s'.", data, record))
-			return nil
+			return fmt.Errorf("no A record with address %s found on '%s'", data, record)
 		}
 		req := ldap.NewModifyRequest(entry.DN)
 		req.Delete("dnsRecord", []string{string(match)})

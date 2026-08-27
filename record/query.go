@@ -34,8 +34,7 @@ func QueryRecord(opts *common.Options, record string) error {
 		return err
 	}
 	if entry == nil {
-		logger.Warn(fmt.Sprintf("Record '%s' not found in zone '%s'.", record, ctx.Zone))
-		return nil
+		return fmt.Errorf("record '%s' not found in zone '%s'", record, ctx.Zone)
 	}
 
 	name := entry.GetEqualFoldAttributeValue("name")
