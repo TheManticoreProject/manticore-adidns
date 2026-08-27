@@ -130,17 +130,6 @@ $ ./adidns zone info -dc 10.0.0.1 -d domain.local -u jdoe -p 'Passw0rd!'
       └── ...
 ```
 
-## Output format
-
-Results are printed with a shared convention, using inline ANSI colours:
-
-- A list of results starts with a `[>] <Title> (<count>):` header, the count highlighted in
-  yellow, and the items rendered as a `├──`/`└──` tree.
-- Object names, distinguished names, and record values are shown in blue; suspicious findings
-  (for example an insecure dynamic-update policy) in red.
-- Write results use `[+]` (created), `[~]` (updated), and `[-]` (removed/deleted).
-- The tool exits with a non-zero status when an operation fails.
-
 ## Building
 
 ```
