@@ -78,7 +78,27 @@ func RemoveRecord(opts *common.Options, record, data string, rtype string) error
 		return nil
 	}
 
-	// A single record remains: tombstone the node instead of deleting the last value.
+	// A single record remains: validate it matches the provided address before tombstoning.
+	var hasMatchingRecord bool
+	for _, raw := range raws {
+		rec := &msdnsp.DNS_RECORD{}
+		if _, err := rec.Unmarshal(raw); err != nil || rec.Type != msdnsp.DNS_TYPE_A {
+			continue
+		}
+		a := &msdnsp.DNS_RPC_RECORD_A{}
+		if _, err := a.Unmarshal(rec.Data); err != nil {
+			continue
+		}
+		if a.GetIPv4().Equal(wanted) {
+			hasMatchingRecord = true
+			break
+		}
+	}
+	if !hasMatchingRecord {
+		return fmt.Errorf("no A record with address %s found on '%s'", data, record)
+	}
+
+	// Tombstone the node instead of deleting the last value.
 	tombstone, err := newTombstoneRecord(ctx.NextSerial())
 	if err != nil {
 		return err
