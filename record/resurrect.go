@@ -37,6 +37,11 @@ func ResurrectRecord(opts *common.Options, record string) error {
 		return nil
 	}
 
+	if entry.GetEqualFoldAttributeValue("dNSTombstoned") != "TRUE" {
+		logger.Warn(fmt.Sprintf("Node '%s' is not tombstoned; nothing to do.", record))
+		return nil
+	}
+
 	if len(entry.GetEqualFoldRawAttributeValues("dnsRecord")) > 1 {
 		logger.Warn(fmt.Sprintf("Node '%s' has multiple records; refusing to resurrect.", record))
 		return nil
