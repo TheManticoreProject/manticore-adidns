@@ -45,7 +45,9 @@ func AddRecord(opts *common.Options, record, data string, ttl int, allowMultiple
 	}
 
 	if entry != nil {
-		if !allowMultiple {
+		isTombstoned := entry.GetEqualFoldAttributeValue("dNSTombstoned") == "TRUE"
+
+		if !isTombstoned && !allowMultiple {
 			for _, raw := range entry.GetEqualFoldRawAttributeValues("dnsRecord") {
 				existing := &msdnsp.DNS_RECORD{}
 				if _, err := existing.Unmarshal(raw); err != nil {
@@ -70,7 +72,12 @@ func AddRecord(opts *common.Options, record, data string, ttl int, allowMultiple
 			return err
 		}
 		req := ldap.NewModifyRequest(entry.DN)
-		req.Add("dnsRecord", []string{value})
+		if isTombstoned {
+			req.Replace("dnsRecord", []string{value})
+			req.Replace("dNSTombstoned", []string{"FALSE"})
+		} else {
+			req.Add("dnsRecord", []string{value})
+		}
 		if err := ctx.Session.Modify(req); err != nil {
 			return fmt.Errorf("adding record to '%s': %w", entry.DN, err)
 		}
